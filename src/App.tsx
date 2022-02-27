@@ -15,7 +15,7 @@ import products from './products';
 import invoices from './invoices';
 import categories from './categories';
 import reviews from './reviews';
-import dataProviderFactory from './dataProvider';
+import dummyDataprovider from './dataProvider/dummyDataprovider';
 
 const i18nProvider = polyglotI18nProvider(locale => {
     if (locale === 'fr') {
@@ -29,10 +29,8 @@ const i18nProvider = polyglotI18nProvider(locale => {
 const App = () => {
     return (
         <Admin
-            title=""
-            dataProvider={dataProviderFactory(
-                process.env.REACT_APP_DATA_PROVIDER || ''
-            )}
+            title="Firebase Auth"
+            dataProvider={dummyDataprovider}
             customReducers={{ theme: themeReducer }}
             customRoutes={customRoutes}
             authProvider={authProvider}

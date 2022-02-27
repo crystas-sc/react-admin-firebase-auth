@@ -1,10 +1,83 @@
 import { AuthProvider } from 'react-admin';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+    apiKey: "AIzaSyBCyTlgHqf1Ga3wON6S_xhZImBUOJYPUIs",
+    authDomain: "phone-auth-test1-b1724.firebaseapp.com",
+    projectId: "phone-auth-test1-b1724",
+    storageBucket: "phone-auth-test1-b1724.appspot.com",
+    messagingSenderId: "34524942844",
+    appId: "1:34524942844:web:87b593c5c2aec0308ce279",
+    measurementId: "G-G06XY9ZYXV"
+};
+
+// Initialize Firebase
+export const firebaseApp = initializeApp(firebaseConfig);
+declare global {
+    interface Window {
+        recaptchaVerifier: any;
+        confirmationResult: any;
+    }
+}
+const auth = getAuth(firebaseApp);
+window.recaptchaVerifier = new RecaptchaVerifier('sign-in-button', {
+    'size': 'invisible',
+    'callback': (response: any) => {
+        // reCAPTCHA solved, allow signInWithPhoneNumber.
+        // onSignInSubmit();
+    }
+}, auth);
+
+const sendVerificationCode = (phoneNumber: any) => {
+
+    const appVerifier = window.recaptchaVerifier;
+
+    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+        .then(confirmationResult => {
+            // const sentCodeId = confirmationResult.verificationId;
+            window.confirmationResult = confirmationResult;
+
+        })
+        // .catch((error) => {
+        //     console.log("signInWithPhoneNumber error",error);
+        // });
+}
+
 
 const authProvider: AuthProvider = {
-    login: ({ username }) => {
-        localStorage.setItem('username', username);
-        // accept all username/password combinations
-        return Promise.resolve();
+    login: async ({ username, password }) => {
+
+       
+        // localStorage.setItem('username', username);
+        // return Promise.resolve();
+
+        const otp = password;
+        if (!otp) {
+            sendVerificationCode(username);
+            return Promise.reject();
+        }
+        if (username && otp) {
+            try {
+                const result = await window.confirmationResult.confirm(otp)
+                localStorage.setItem('username', JSON.stringify(result.user));
+                // accept all username/password combinations
+                return Promise.resolve();
+            } catch (e) {
+                // User couldn't sign in (bad verification code?)
+                // ...
+                console.error("login", "User couldn't sign in (bad verification code?)", e)
+            }
+
+
+        }
+        return Promise.reject();
     },
     logout: () => {
         localStorage.removeItem('username');
