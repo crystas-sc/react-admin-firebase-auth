@@ -212,6 +212,13 @@ const customEnglishMessages: TranslationMessages = {
             },
         },
     },
+    firebase:{
+        "phone_no": 'Phone number',
+        "otp": 'OTP',
+        "get_otp": 'Get OTP',
+        "confirm_otp": 'Confirm OTP',
+    }
 };
+customEnglishMessages["auth"]
 
 export default customEnglishMessages;

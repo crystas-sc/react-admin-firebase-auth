@@ -35,33 +35,35 @@ window.recaptchaVerifier = new RecaptchaVerifier('sign-in-button', {
     }
 }, auth);
 
-const sendVerificationCode = (phoneNumber: any) => {
+const sendVerificationCode = async (phoneNumber: any) => {
 
     const appVerifier = window.recaptchaVerifier;
+    try {
+        const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+        window.confirmationResult = confirmationResult;
+        return { status: true, msg: "success" };
+    } catch (e: any) {
+        console.error(e)
+        return { status: false, msg: e.message };
+    }
 
-    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-        .then(confirmationResult => {
-            // const sentCodeId = confirmationResult.verificationId;
-            window.confirmationResult = confirmationResult;
-
-        })
-        // .catch((error) => {
-        //     console.log("signInWithPhoneNumber error",error);
-        // });
 }
 
 
 const authProvider: AuthProvider = {
     login: async ({ username, password }) => {
 
-       
+
         // localStorage.setItem('username', username);
         // return Promise.resolve();
 
         const otp = password;
         if (!otp) {
-            sendVerificationCode(username);
-            return Promise.reject();
+            const res: any = await sendVerificationCode(username);
+            if (res.status) {
+                return Promise.reject({name:"otpSent", message:"OTP successfully sent"});
+            }
+            return Promise.reject(res.msg);
         }
         if (username && otp) {
             try {
@@ -73,6 +75,7 @@ const authProvider: AuthProvider = {
                 // User couldn't sign in (bad verification code?)
                 // ...
                 console.error("login", "User couldn't sign in (bad verification code?)", e)
+                return Promise.reject(e);
             }
 
 

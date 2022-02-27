@@ -3,7 +3,7 @@
     "extends": [
         "react-app",
         "plugin:prettier/recommended",
-        "prettier/@typescript-eslint",
+        // "prettier/@typescript-eslint",
         "prettier/babel",
         "prettier/react"
     ],
@@ -11,7 +11,7 @@
         "@typescript-eslint",
         "import",
         "jsx-a11y",
-        "prettier",
+        // "prettier",
         "react",
         "react-hooks"
     ],

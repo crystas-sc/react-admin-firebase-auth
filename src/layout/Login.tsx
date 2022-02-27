@@ -82,6 +82,7 @@ const { Form } = withTypes<FormValues>();
 
 const Login = () => {
     const [loading, setLoading] = useState(false);
+    const [sendPhoneCode, setSendPhoneCode] = useState(false);
     const translate = useTranslate();
     const classes = useStyles();
     const notify = useNotify();
@@ -90,27 +91,33 @@ const Login = () => {
 
     const handleSubmit = (auth: FormValues) => {
         setLoading(true);
+        setSendPhoneCode(true)
         login(auth, location.state ? location.state.nextPathname : '/').catch(
             (error: Error) => {
                 setLoading(false);
-                notify(
-                    typeof error === 'string'
-                        ? error
-                        : typeof error === 'undefined' || !error.message
-                        ? 'ra.auth.sign_in_error'
-                        : error.message,
-                    {
-                        type: 'warning',
-                        messageArgs: {
-                            _:
-                                typeof error === 'string'
-                                    ? error
-                                    : error && error.message
-                                    ? error.message
-                                    : undefined,
-                        },
-                    }
-                );
+                if (typeof error !== 'string' && error.name == "otpSent") {
+                    notify(error.message);
+                }
+                else {
+                    notify(
+                        typeof error === 'string'
+                            ? error
+                            : typeof error === 'undefined' || !error.message
+                                ? 'ra.auth.sign_in_error'
+                                : error.message,
+                        {
+                            type: 'warning',
+                            messageArgs: {
+                                _:
+                                    typeof error === 'string'
+                                        ? error
+                                        : error && error.message
+                                            ? error.message
+                                            : undefined,
+                            },
+                        }
+                    );
+                }
             }
         );
     };
@@ -140,7 +147,7 @@ const Login = () => {
                                 </Avatar>
                             </div>
                             <div className={classes.hint}>
-                                Hint: demo / demo
+                                Hint: +911234567890 / 123456
                             </div>
                             <div className={classes.form}>
                                 <div className={classes.input}>
@@ -149,8 +156,8 @@ const Login = () => {
                                         name="username"
                                         // @ts-ignore
                                         component={renderInput}
-                                        label={translate('ra.auth.username')}
-                                        disabled={loading}
+                                        label={translate('firebase.phone_no')}
+                                        disabled={sendPhoneCode}
                                     />
                                 </div>
                                 <div className={classes.input}>
@@ -158,9 +165,9 @@ const Login = () => {
                                         name="password"
                                         // @ts-ignore
                                         component={renderInput}
-                                        label={translate('ra.auth.password')}
+                                        label={translate('firebase.otp')}
                                         type="password"
-                                        disabled={loading}
+                                        disabled={!sendPhoneCode}
                                     />
                                 </div>
                             </div>
@@ -178,7 +185,7 @@ const Login = () => {
                                             thickness={2}
                                         />
                                     )}
-                                    {translate('ra.auth.sign_in')}
+                                    {sendPhoneCode ? translate('firebase.confirm_otp') : translate('firebase.get_otp')}
                                 </Button>
                             </CardActions>
                         </Card>
